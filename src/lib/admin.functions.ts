@@ -156,6 +156,9 @@ export const createManualPayment = createServerFn({ method: "POST" })
       amount: PRICES[data.level],
       payment_status: "noted",
       certificate_id: certificateId,
+    });
+    if (error) throw error;
+    return { success: true, certificateId };
   });
 
 /**
@@ -208,6 +211,4 @@ export const getLearnerCourses = createServerFn({ method: "POST" })
 
     return { courses };
   });
-    if (error) throw error;
-    return { success: true, certificateId };
-  });
+
