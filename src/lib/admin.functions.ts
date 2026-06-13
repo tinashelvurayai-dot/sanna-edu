@@ -156,7 +156,58 @@ export const createManualPayment = createServerFn({ method: "POST" })
       amount: PRICES[data.level],
       payment_status: "noted",
       certificate_id: certificateId,
+  });
+
+/**
+ * Fetch all course_progress rows for a single learner and resolve them
+ * into picker-friendly options (course id + title + level + completion).
+ * Used by the smart cash payment form so the admin doesn't have to type
+ * the course name - they pick from what the learner actually studied.
+ */
+export const getLearnerCourses = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string }) => {
+    if (!input?.userId) throw new Error("Missing userId");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getCatalogItem, getCourseTitle } = await import("@/lib/courses");
+
+    const { data: progress, error } = await supabaseAdmin
+      .from("course_progress")
+      .select("course_id, level, completed_modules, is_completed, updated_at")
+      .eq("user_id", data.userId)
+      .order("updated_at", { ascending: false });
+    if (error) throw error;
+
+    const { data: paid } = await supabaseAdmin
+      .from("certificate_payments")
+      .select("course_id, certificate_type")
+      .eq("user_id", data.userId)
+      .in("payment_status", ["paid_pending_admin", "noted", "certificate_sent"]);
+    const paidKey = new Set((paid ?? []).map((p) => `${p.course_id}::${p.certificate_type}`));
+
+    const courses = (progress ?? []).map((row) => {
+      const item = getCatalogItem(row.course_id);
+      const level = (row.level === "diploma" ? "diploma" : "certificate") as
+        | "certificate"
+        | "diploma";
+      const title = item ? getCourseTitle(item, level) : row.course_id;
+      return {
+        courseId: row.course_id,
+        title,
+        level,
+        completedModules: Array.isArray(row.completed_modules) ? row.completed_modules.length : 0,
+        isCompleted: Boolean(row.is_completed),
+        alreadyPaid: paidKey.has(`${row.course_id}::${level}`),
+        updatedAt: row.updated_at,
+      };
     });
+
+    return { courses };
+  });
     if (error) throw error;
     return { success: true, certificateId };
   });
