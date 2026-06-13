@@ -66,7 +66,7 @@ function Dashboard() {
       <SiteNavbar />
       <section className="pt-32 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-black text-blue-900 mb-1">Welcome back, {firstName} 👋</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-blue-900 mb-1">Welcome back, {firstName}</h1>
           <p className="text-blue-600 mb-8">Continue where you left off.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">

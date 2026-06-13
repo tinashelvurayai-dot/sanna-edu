@@ -28,16 +28,45 @@ function AdminGatePage() {
 
   const adminExists = data?.adminExists ?? false;
 
+  const ADMIN_ALLOWLIST = ["edusannaonlinelearning@gmail.com", "tinashelvurayai@gmail.com"];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (adminExists) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+      // Try sign-in first
+      const signIn = await supabase.auth.signInWithPassword({ email, password });
+      if (!signIn.error) {
         toast.success("Welcome back, admin.");
         navigate({ to: "/admin" });
-      } else {
+        return;
+      }
+
+      const msg = signIn.error.message.toLowerCase();
+      const looksMissing = msg.includes("invalid login") || msg.includes("invalid credentials") || msg.includes("not confirmed");
+      const allowlisted = ADMIN_ALLOWLIST.includes(email.trim().toLowerCase());
+
+      // If allowlisted admin account doesn't exist yet, create it then sign in
+      if (looksMissing && allowlisted) {
+        const signUp = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`,
+            data: { full_name: fullName || email.split("@")[0], signup_type: "standard", is_admin_signup: "true" },
+          },
+        });
+        if (signUp.error && !signUp.error.message.toLowerCase().includes("already")) throw signUp.error;
+
+        const retry = await supabase.auth.signInWithPassword({ email, password });
+        if (retry.error) throw retry.error;
+        toast.success("Admin account ready. Welcome!");
+        navigate({ to: "/admin" });
+        return;
+      }
+
+      // Non-allowlisted: original create-admin flow when no admin exists
+      if (!adminExists) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -47,9 +76,12 @@ function AdminGatePage() {
           },
         });
         if (error) throw error;
-        toast.success("Admin account created. Confirm your email, then tap the footer logo 7 times to sign in.");
+        toast.success("Admin account created. Tap the footer logo 7 times to sign in.");
         navigate({ to: "/" });
+        return;
       }
+
+      throw signIn.error;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {

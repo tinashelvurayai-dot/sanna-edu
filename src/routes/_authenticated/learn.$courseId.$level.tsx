@@ -59,6 +59,7 @@ function LearnPage() {
   const completed = progress?.completed_modules ?? [];
   const currentModule = modules[active];
   const isModuleDone = currentModule ? completed.includes(currentModule.id) : false;
+  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => {
     // jump to first incomplete module on load
@@ -66,6 +67,9 @@ function LearnPage() {
     if (firstIncomplete > 0) setActive(firstIncomplete);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
+
+  // Reset quiz view when switching modules
+  useEffect(() => { setShowQuiz(false); }, [active]);
 
   const markComplete = async (moduleId: number) => {
     if (!user) return;
@@ -133,19 +137,36 @@ function LearnPage() {
                 <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Module {active + 1} of {modules.length}</span>
                 <h1 className="text-2xl sm:text-3xl font-black text-blue-900 mt-1 mb-6">{currentModule.title}</h1>
 
-                <article className="max-w-none">
-                  <CourseContentBody content={currentModule.content} />
-                </article>
+                {!showQuiz && (
+                  <article className="max-w-none">
+                    <CourseContentBody content={currentModule.content} />
+                  </article>
+                )}
 
                 {currentModule.quiz?.length && currentModule.quiz[0] ? (
                   <div className="mt-10">
-                    <h2 className="text-xl font-bold text-blue-900 mb-4">Knowledge check</h2>
                     {isModuleDone ? (
                       <div className="rounded-xl bg-green-50 text-green-800 p-5 flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5" /> You've passed this module's quiz.
                       </div>
+                    ) : !showQuiz ? (
+                      <div className="rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-6 text-center">
+                        <h2 className="text-xl font-bold text-blue-900 mb-2">Ready for the knowledge check?</h2>
+                        <p className="text-blue-600 mb-4 text-sm">The notes will be hidden while you answer. You need 70% to complete this module.</p>
+                        <Button onClick={() => setShowQuiz(true)} className="premium-button px-6 py-3">
+                          Start quiz
+                        </Button>
+                      </div>
                     ) : (
-                      <QuizModule questions={currentModule.quiz} onPassed={() => markComplete(currentModule.id)} />
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-bold text-blue-900">Knowledge check</h2>
+                          <Button variant="ghost" size="sm" onClick={() => setShowQuiz(false)} className="text-blue-600">
+                            Back to notes
+                          </Button>
+                        </div>
+                        <QuizModule questions={currentModule.quiz} onPassed={() => markComplete(currentModule.id)} />
+                      </>
                     )}
                   </div>
                 ) : (
