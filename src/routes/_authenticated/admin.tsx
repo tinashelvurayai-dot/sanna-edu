@@ -193,22 +193,42 @@ function PaymentsTab() {
 function CashPaymentForm() {
   const qc = useQueryClient();
   const fetchUsers = useServerFn(listUsers);
+  const fetchLearnerCourses = useServerFn(getLearnerCourses);
   const recordPayment = useServerFn(createManualPayment);
   const { data: usersData } = useQuery({ queryKey: ["admin-users"], queryFn: () => fetchUsers() });
   const users = usersData?.users ?? [];
 
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
+  const [courseId, setCourseId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [level, setLevel] = useState<"certificate" | "diploma">("certificate");
+  const [manualMode, setManualMode] = useState(false);
+
+  const { data: learnerCoursesData, isFetching: loadingCourses } = useQuery({
+    queryKey: ["learner-courses", userId],
+    queryFn: () => fetchLearnerCourses({ data: { userId } }),
+    enabled: Boolean(userId),
+  });
+  const learnerCourses = learnerCoursesData?.courses ?? [];
+
+  const pickCourse = (key: string) => {
+    const c = learnerCourses.find((x: any) => `${x.courseId}::${x.level}` === key);
+    if (!c) return;
+    setCourseId(c.courseId);
+    setCourseName(c.title);
+    setLevel(c.level);
+  };
 
   const mutation = useMutation({
-    mutationFn: () => recordPayment({ data: { userId, courseId: "", courseName, level } }),
+    mutationFn: () => recordPayment({ data: { userId, courseId, courseName, level } }),
     onSuccess: () => {
       toast.success("Cash payment recorded");
       qc.invalidateQueries({ queryKey: ["admin-payments"] });
       qc.invalidateQueries({ queryKey: ["admin-stats"] });
-      setUserId(""); setCourseName(""); setLevel("certificate"); setOpen(false);
+      qc.invalidateQueries({ queryKey: ["learner-courses", userId] });
+      setUserId(""); setCourseId(""); setCourseName(""); setLevel("certificate");
+      setManualMode(false); setOpen(false);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to record payment"),
   });
@@ -218,47 +238,98 @@ function CashPaymentForm() {
       <div className="glass-card-light p-4 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h3 className="font-bold text-blue-900">Paid with cash?</h3>
-          <p className="text-sm text-blue-600">Manually mark a learner as paid so you can issue their credential.</p>
+          <p className="text-sm text-blue-600">Pick a learner and we'll auto-detect the courses they've studied.</p>
         </div>
         <Button onClick={() => setOpen(true)} className="premium-button">Record cash payment</Button>
       </div>
     );
   }
 
+  const hasCourses = learnerCourses.length > 0;
+
   return (
     <div className="glass-card-light p-5 space-y-4">
       <h3 className="font-bold text-blue-900">Record a cash / offline payment</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <Label>Learner</Label>
-          <Select value={userId} onValueChange={setUserId}>
-            <SelectTrigger className="h-10"><SelectValue placeholder="Select learner" /></SelectTrigger>
-            <SelectContent>
-              {users.map((u: any) => (
-                <SelectItem key={u.id} value={u.id}>
-                  {(u.full_name ?? "Learner")} - {u.email ?? "no email"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="cashCourse">Course name</Label>
-          <Input id="cashCourse" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="Data Science" />
-        </div>
-        <div>
-          <Label>Level</Label>
-          <Select value={level} onValueChange={(v) => setLevel(v as "certificate" | "diploma")}>
-            <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="certificate">Certificate ($12)</SelectItem>
-              <SelectItem value="diploma">Diploma ($18)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div>
+        <Label>Learner</Label>
+        <Select value={userId} onValueChange={(v) => { setUserId(v); setCourseId(""); setCourseName(""); setManualMode(false); }}>
+          <SelectTrigger className="h-10"><SelectValue placeholder="Select learner" /></SelectTrigger>
+          <SelectContent>
+            {users.map((u: any) => (
+              <SelectItem key={u.id} value={u.id}>
+                {(u.full_name ?? "Learner")} - {u.email ?? "no email"}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      {userId && (
+        <>
+          {loadingCourses ? (
+            <p className="text-sm text-blue-500">Loading their courses…</p>
+          ) : hasCourses && !manualMode ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Course this learner studied</Label>
+                <button type="button" onClick={() => setManualMode(true)} className="text-xs text-blue-600 hover:underline">
+                  Enter manually instead
+                </button>
+              </div>
+              <Select value={courseId && level ? `${courseId}::${level}` : ""} onValueChange={pickCourse}>
+                <SelectTrigger className="h-10"><SelectValue placeholder="Pick from their progress" /></SelectTrigger>
+                <SelectContent>
+                  {learnerCourses.map((c: any) => {
+                    const key = `${c.courseId}::${c.level}`;
+                    return (
+                      <SelectItem key={key} value={key} disabled={c.alreadyPaid}>
+                        {c.title} - {c.level === "diploma" ? "Diploma" : "Certificate"}
+                        {c.isCompleted ? " (completed)" : c.completedModules ? ` (${c.completedModules} modules)` : ""}
+                        {c.alreadyPaid ? " - already paid" : ""}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cashCourse">Course name</Label>
+                <Input id="cashCourse" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="Data Science" />
+              </div>
+              <div>
+                <Label>Level</Label>
+                <Select value={level} onValueChange={(v) => setLevel(v as "certificate" | "diploma")}>
+                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="certificate">Certificate ($12)</SelectItem>
+                    <SelectItem value="diploma">Diploma ($18)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {hasCourses && (
+                <button type="button" onClick={() => setManualMode(false)} className="text-xs text-blue-600 hover:underline justify-self-start">
+                  ← Back to detected courses
+                </button>
+              )}
+            </div>
+          )}
+
+          {courseName && (
+            <div className="text-sm text-blue-700 bg-blue-50 rounded-md px-3 py-2">
+              Recording <strong>{courseName}</strong> ({level}) - <strong>${level === "diploma" ? 18 : 12}</strong>
+            </div>
+          )}
+        </>
+      )}
+
       <div className="flex gap-3">
-        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} className="premium-button">
+        <Button
+          onClick={() => mutation.mutate()}
+          disabled={mutation.isPending || !userId || !courseName}
+          className="premium-button"
+        >
           {mutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Save as paid
         </Button>
