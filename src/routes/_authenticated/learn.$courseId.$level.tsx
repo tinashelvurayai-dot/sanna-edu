@@ -59,6 +59,7 @@ function LearnPage() {
   const completed = progress?.completed_modules ?? [];
   const currentModule = modules[active];
   const isModuleDone = currentModule ? completed.includes(currentModule.id) : false;
+  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => {
     // jump to first incomplete module on load
@@ -66,6 +67,9 @@ function LearnPage() {
     if (firstIncomplete > 0) setActive(firstIncomplete);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
+
+  // Reset quiz view when switching modules
+  useEffect(() => { setShowQuiz(false); }, [active]);
 
   const markComplete = async (moduleId: number) => {
     if (!user) return;
