@@ -19,7 +19,7 @@ import {
 import { toast } from "sonner";
 import {
   checkIsAdmin, getAdminStats, listPayments, listUsers, updatePaymentStatus,
-  createManualPayment,
+  createManualPayment, getLearnerCourses,
 } from "@/lib/admin.functions";
 import { CertificatePreview, type CertificateData } from "@/components/certificate-preview";
 import { Input } from "@/components/ui/input";
