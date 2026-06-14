@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Users, Globe, GraduationCap, Play, CheckCircle, ShieldCheck, Star, TrendingUp } from "lucide-react";
+import { Award, Users, Globe, GraduationCap, Play, CheckCircle, ShieldCheck, Star, TrendingUp, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,14 +69,26 @@ function Index() {
       {/* Hero */}
       <section className="pt-36 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center px-6 py-3 rounded-full backdrop-blur-md bg-blue-100/50 text-blue-900 text-sm font-semibold shadow-sm mb-8 border border-blue-200">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center px-6 py-3 rounded-full backdrop-blur-md bg-[rgba(99,102,241,0.12)] text-indigo-200 text-sm font-semibold shadow-sm mb-8 border border-[rgba(139,124,255,0.3)]"
+          >
+            <Sparkles className="w-4 h-4 mr-2 text-fuchsia-300" />
             Free Learning · Certificate &amp; Diploma Programs A-Z
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black mb-8 leading-tight">
-            <span className="text-blue-900">Learn Anything.</span>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black mb-8 leading-tight tracking-tight"
+          >
+            <span className="text-white">Learn Anything.</span>
             <br />
             <span className="gradient-text">Completely Free.</span>
-          </h1>
+          </motion.h1>
+
           <p className="text-lg md:text-2xl text-blue-800 mb-10 max-w-3xl mx-auto leading-relaxed font-light">
             Create a free account and access all courses instantly. Learn at your own pace, track your progress and
             only pay when you're ready for an official Certificate ($12) or Diploma ($18).
