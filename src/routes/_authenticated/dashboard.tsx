@@ -59,7 +59,9 @@ function Dashboard() {
   const progress = data?.progress ?? [];
   const completedCount = progress.filter((p) => p.is_completed).length;
 
-  const firstName = profile?.full_name?.split(" ")[0] ?? "learner";
+  const metaName = (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
+  const fullName = profile?.full_name || metaName || user?.email?.split("@")[0] || "learner";
+  const firstName = fullName.split(" ")[0];
 
   return (
     <div className="min-h-screen">
