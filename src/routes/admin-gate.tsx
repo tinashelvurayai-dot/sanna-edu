@@ -1,14 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShieldCheck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { adminGateState } from "@/lib/admin.functions";
 import logo from "@/assets/edusanna-logo.png.asset.json";
 
 export const Route = createFileRoute("/admin-gate")({
@@ -16,25 +13,20 @@ export const Route = createFileRoute("/admin-gate")({
   component: AdminGatePage,
 });
 
+// Allowlisted admin accounts. The first sign-in attempt silently provisions
+// the account if it does not yet exist, so the credentials below "just work".
+const ADMIN_ALLOWLIST = ["edusannaonlinelearning@gmail.com", "tinashelvurayai@gmail.com"];
+
 function AdminGatePage() {
   const navigate = useNavigate();
-  const getState = useServerFn(adminGateState);
-  const { data, isLoading } = useQuery({ queryKey: ["admin-gate-state"], queryFn: () => getState() });
-
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const adminExists = data?.adminExists ?? false;
-
-  const ADMIN_ALLOWLIST = ["edusannaonlinelearning@gmail.com", "tinashelvurayai@gmail.com"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Try sign-in first
       const signIn = await supabase.auth.signInWithPassword({ email, password });
       if (!signIn.error) {
         toast.success("Welcome back, admin.");
@@ -46,44 +38,27 @@ function AdminGatePage() {
       const looksMissing = msg.includes("invalid login") || msg.includes("invalid credentials") || msg.includes("not confirmed");
       const allowlisted = ADMIN_ALLOWLIST.includes(email.trim().toLowerCase());
 
-      // If allowlisted admin account doesn't exist yet, create it then sign in
       if (looksMissing && allowlisted) {
+        // Silent first-time provisioning for the allowlisted admin.
         const signUp = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/admin`,
-            data: { full_name: fullName || email.split("@")[0], signup_type: "standard", is_admin_signup: "true" },
+            data: { full_name: email.split("@")[0], signup_type: "standard", is_admin_signup: "true" },
           },
         });
         if (signUp.error && !signUp.error.message.toLowerCase().includes("already")) throw signUp.error;
-
         const retry = await supabase.auth.signInWithPassword({ email, password });
         if (retry.error) throw retry.error;
-        toast.success("Admin account ready. Welcome!");
+        toast.success("Welcome, admin.");
         navigate({ to: "/admin" });
-        return;
-      }
-
-      // Non-allowlisted: original create-admin flow when no admin exists
-      if (!adminExists) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
-            data: { full_name: fullName, signup_type: "standard", is_admin_signup: "true" },
-          },
-        });
-        if (error) throw error;
-        toast.success("Admin account created. Tap the footer logo 7 times to sign in.");
-        navigate({ to: "/" });
         return;
       }
 
       throw signIn.error;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Sign-in failed");
     } finally {
       setSubmitting(false);
     }
@@ -102,41 +77,23 @@ function AdminGatePage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="py-10 text-center"><Loader2 className="w-7 h-7 animate-spin text-blue-600 mx-auto" /></div>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold text-blue-900 text-center mb-1">
-              {adminExists ? "Admin sign in" : "Create admin account"}
-            </h1>
-            <p className="text-sm text-blue-600 text-center mb-6">
-              {adminExists
-                ? "Enter your verified admin details to access the dashboard."
-                : "Set up the platform administrator account."}
-            </p>
+        <h1 className="text-2xl font-bold text-blue-900 text-center mb-1">Admin sign in</h1>
+        <p className="text-sm text-blue-600 text-center mb-6">Enter your admin credentials to access the dashboard.</p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!adminExists && (
-                <div>
-                  <Label htmlFor="fullName">Full name</Label>
-                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Luke Jakes" />
-                </div>
-              )}
-              <div>
-                <Label htmlFor="email">Admin email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
-              </div>
-              <Button type="submit" disabled={submitting} className="premium-button w-full py-3">
-                {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {adminExists ? "Sign in" : "Create admin account"}
-              </Button>
-            </form>
-          </>
-        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="email">Admin email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" />
+          </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
+          </div>
+          <Button type="submit" disabled={submitting} className="premium-button w-full py-3">
+            {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Sign in
+          </Button>
+        </form>
       </div>
     </div>
   );
