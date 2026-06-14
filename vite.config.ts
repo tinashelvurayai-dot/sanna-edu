@@ -14,11 +14,5 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
-  nitro: isVercel
-    ? {
-        config: {
-          preset: "vercel",
-        },
-      }
-    : undefined,
+  nitro: isVercel ? { preset: "vercel" } : undefined,
 });
