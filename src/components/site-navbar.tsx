@@ -25,7 +25,7 @@ export function SiteNavbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-white/70 border-b border-blue-200/30">
+    <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[rgba(7,9,26,0.7)] border-b border-[rgba(139,124,255,0.15)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 gap-2">
           <Link to="/" className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition min-w-0">
