@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
+import { AuroraBg } from "../components/aurora-bg";
 
 function NotFoundComponent() {
   return (
@@ -133,12 +134,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="min-h-screen premium-bg">
+          <AuroraBg />
           <div className="premium-container">
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
           </div>
         </div>
-        <Toaster richColors position="top-center" />
+        <Toaster richColors position="top-center" theme="dark" />
       </AuthProvider>
     </QueryClientProvider>
   );
