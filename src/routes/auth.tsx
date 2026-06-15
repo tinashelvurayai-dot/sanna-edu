@@ -10,6 +10,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { PhoneInput, COUNTRIES, type Country } from "@/components/phone-input";
 import logo from "@/assets/edusanna-logo.png.asset.json";
+import { SmartBack } from "@/components/smart-back";
 
 type AuthMode = "login" | "signup";
 type SignupType = "standard" | "academia";

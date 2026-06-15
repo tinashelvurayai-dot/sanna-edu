@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/edusanna-logo.png.asset.json";
+import { SmartBack } from "@/components/smart-back";
 
 export const Route = createFileRoute("/admin-gate")({
   head: () => ({ meta: [{ title: "Admin Access | Edusanna" }, { name: "robots", content: "noindex" }] }),
