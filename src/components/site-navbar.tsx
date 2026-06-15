@@ -2,10 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import logo from "@/assets/edusanna-logo.png.asset.json";
+
+const ADMIN_SHORTCUT_KEY = "edusanna_admin_shortcut_until";
 
 export function SiteNavbar() {
   const { user, signOut } = useAuth();
@@ -18,6 +21,34 @@ export function SiteNavbar() {
     enabled: !!user,
     staleTime: 5 * 60_000,
   });
+
+  const tapCount = useRef(0);
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleLogoClick = (e: React.MouseEvent) => {
+    tapCount.current += 1;
+    if (tapTimer.current) clearTimeout(tapTimer.current);
+    tapTimer.current = setTimeout(() => {
+      tapCount.current = 0;
+    }, 3000);
+    if (tapCount.current >= 17) {
+      e.preventDefault();
+      tapCount.current = 0;
+      if (adminData?.isAdmin) {
+        // Grant 1-hour admin shortcut window
+        try {
+          window.sessionStorage.setItem(
+            ADMIN_SHORTCUT_KEY,
+            String(Date.now() + 60 * 60 * 1000),
+          );
+        } catch {
+          // ignore
+        }
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/admin-gate" });
+      }
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
