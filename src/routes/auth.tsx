@@ -10,6 +10,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { PhoneInput, COUNTRIES, type Country } from "@/components/phone-input";
 import logo from "@/assets/edusanna-logo.png.asset.json";
+import { SmartBack } from "@/components/smart-back";
 
 type AuthMode = "login" | "signup";
 type SignupType = "standard" | "academia";
@@ -131,9 +132,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md glass-card-light p-8">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </Link>
+        <SmartBack fallback="/" label="Back" />
         <Link to="/" className="flex flex-col items-center mb-8">
           <img src={logo.url} alt="Edusanna logo" className="w-24 h-24 object-contain mb-2" />
           <span className="text-2xl font-bold gradient-text">EDUSANNA</span>
@@ -148,11 +147,11 @@ function AuthPage() {
               <button
                 type="button"
                 onClick={() => setSignupType("standard")}
-                className="w-full p-6 rounded-xl border-2 border-blue-200 bg-white hover:bg-blue-50 transition-all text-center group"
+                className="w-full p-6 rounded-xl border-2 border-sky-300 ring-2 ring-sky-200/60 bg-white hover:bg-sky-50 transition-all text-center group shadow-sm"
               >
-                <User className="w-7 h-7 mx-auto mb-2 text-blue-600" />
-                <h3 className="font-bold text-xl text-blue-900 mb-1 group-hover:text-blue-700">STANDARD</h3>
-                <p className="text-sm text-blue-600 font-semibold">For individual learners</p>
+                <User className="w-7 h-7 mx-auto mb-2 text-sky-600" />
+                <h3 className="font-bold text-xl text-blue-900 mb-1 group-hover:text-sky-700">STANDARD</h3>
+                <p className="text-sm text-sky-600 font-semibold">For individual learners</p>
               </button>
               <button
                 type="button"

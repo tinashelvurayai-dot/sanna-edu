@@ -35,7 +35,7 @@ function Dashboard() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("full_name").eq("id", user!.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("full_name, signup_type, school_name").eq("id", user!.id).maybeSingle();
       return data;
     },
   });
@@ -70,6 +70,17 @@ function Dashboard() {
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-black text-blue-900 mb-1">Welcome back, {firstName}</h1>
           <p className="text-blue-600 mb-8">Continue where you left off.</p>
+
+          {profile?.signup_type === "academia" && (
+            <div className="mb-8 space-y-3">
+              <div className="rounded-xl border border-purple-300 bg-purple-50 p-4 text-purple-900 font-semibold">
+                ACADEMIA Users Are To Pay At School Reception/Administration
+              </div>
+              <div className="rounded-xl border border-sky-300 bg-sky-50 p-4 text-sky-900 font-semibold">
+                You Shall Receive Both Soft &amp; Hard Copies With No Additional Costs
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <StatCard icon={<BookOpen className="w-6 h-6" />} label="Enrolled courses" value={enrollments.length} />
