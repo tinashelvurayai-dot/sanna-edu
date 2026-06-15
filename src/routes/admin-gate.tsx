@@ -67,9 +67,7 @@ function AdminGatePage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md glass-card-light p-8">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </Link>
+        <SmartBack fallback="/" label="Back" />
         <div className="flex flex-col items-center mb-6">
           <img src={logo.url} alt="Edusanna logo" className="w-20 h-20 object-contain mb-2" />
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">

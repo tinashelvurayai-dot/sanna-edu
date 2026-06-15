@@ -131,9 +131,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md glass-card-light p-8">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </Link>
+        <SmartBack fallback="/" label="Back" />
         <Link to="/" className="flex flex-col items-center mb-8">
           <img src={logo.url} alt="Edusanna logo" className="w-24 h-24 object-contain mb-2" />
           <span className="text-2xl font-bold gradient-text">EDUSANNA</span>
