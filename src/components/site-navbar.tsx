@@ -59,7 +59,7 @@ export function SiteNavbar() {
     <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[rgba(7,9,26,0.7)] border-b border-[rgba(139,124,255,0.15)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 gap-2">
-          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition min-w-0">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition min-w-0">
             <img src={logo.url} alt="Edusanna logo" className="w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0" />
             <div className="flex flex-col justify-center min-w-0">
               <span className="text-lg sm:text-2xl font-bold gradient-text leading-tight truncate">EDUSANNA</span>
