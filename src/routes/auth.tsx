@@ -148,11 +148,11 @@ function AuthPage() {
               <button
                 type="button"
                 onClick={() => setSignupType("standard")}
-                className="w-full p-6 rounded-xl border-2 border-blue-200 bg-white hover:bg-blue-50 transition-all text-center group"
+                className="w-full p-6 rounded-xl border-2 border-sky-300 ring-2 ring-sky-200/60 bg-white hover:bg-sky-50 transition-all text-center group shadow-sm"
               >
-                <User className="w-7 h-7 mx-auto mb-2 text-blue-600" />
-                <h3 className="font-bold text-xl text-blue-900 mb-1 group-hover:text-blue-700">STANDARD</h3>
-                <p className="text-sm text-blue-600 font-semibold">For individual learners</p>
+                <User className="w-7 h-7 mx-auto mb-2 text-sky-600" />
+                <h3 className="font-bold text-xl text-blue-900 mb-1 group-hover:text-sky-700">STANDARD</h3>
+                <p className="text-sm text-sky-600 font-semibold">For individual learners</p>
               </button>
               <button
                 type="button"

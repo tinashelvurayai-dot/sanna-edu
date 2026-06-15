@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Users, Globe, GraduationCap, Play, CheckCircle, ShieldCheck, Star, TrendingUp, Sparkles } from "lucide-react";
+import { Award, Users, Globe, GraduationCap, Play, CheckCircle, ShieldCheck, Star, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,6 @@ function Index() {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center px-6 py-3 rounded-full backdrop-blur-md bg-[rgba(99,102,241,0.12)] text-indigo-200 text-sm font-semibold shadow-sm mb-8 border border-[rgba(139,124,255,0.3)]"
           >
-            <Sparkles className="w-4 h-4 mr-2 text-fuchsia-300" />
             Free Learning · Certificate &amp; Diploma Programs A-Z
           </motion.div>
           <motion.h1
@@ -86,7 +85,7 @@ function Index() {
           >
             <span className="text-white">Learn Anything.</span>
             <br />
-            <span className="gradient-text">Completely Free.</span>
+            <span className="text-sky-300">Completely Free.</span>
           </motion.h1>
 
           <p className="text-lg md:text-2xl text-blue-800 mb-10 max-w-3xl mx-auto leading-relaxed font-light">
