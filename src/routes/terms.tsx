@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SmartBack } from "@/components/smart-back";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -17,12 +17,7 @@ function TermsPage() {
     <div className="min-h-screen premium-bg py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link to="/">
-            <Button variant="ghost" className="mb-4">
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
+          <SmartBack fallback="/auth" label="Back" preferAuthIfCameFromAuth />
           <h1 className="text-4xl font-bold text-purple-200 mb-2">Terms of Service</h1>
           <p className="text-white/60">Last updated: January 2024</p>
         </div>
@@ -181,9 +176,6 @@ function TermsPage() {
         <div className="mt-12 flex justify-center gap-6">
           <Link to="/privacy">
             <Button variant="outline">Privacy Policy</Button>
-          </Link>
-          <Link to="/">
-            <Button variant="outline">Back to Home</Button>
           </Link>
         </div>
       </div>
